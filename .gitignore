@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+lib/
+lib64/
+
+# Virtual environments
+bin/
+include/
+pyvenv.cfg
+bck/
+netatmo_config.xml
+
+# IDE
+.vscode/
+*.swp
+*.swo
+netatmo.service
+
+# OS
+.DS_Store
+Thumbs.db

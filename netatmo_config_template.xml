@@ -1,0 +1,27 @@
+<configuration>
+    <mqtt>
+        <endpoint>localhost</endpoint>
+        <username>REPLACE_WITH_MQTT_USERNAME</username>
+        <password>REPLACE_WITH_MQTT_PASSWORD</password>
+        <base_topic>paho/netatmo</base_topic>
+    </mqtt>
+    <netatmo>
+        <client_id>REPLACE_WITH_CLIENT_ID</client_id>
+        <client_secret>REPLACE_WITH_CLIENT_SECRET</client_secret>
+        <username>REPLACE_WITH_NETATMO_USERNAME</username>
+        <password>REPLACE_WITH_NETATMO_PASSWORD</password>
+    </netatmo>
+    <timers>
+        <refresh_homedata>540</refresh_homedata>
+        <reconnect_interval>15</reconnect_interval>
+        <max_reconnect_interval>300</max_reconnect_interval>
+        <backoff_multiplier>2.0</backoff_multiplier>
+    </timers>
+    <websocket>
+        <endpoint>wss://app-ws.netatmo.net/ws/</endpoint>
+    </websocket>
+    <logging>
+        <prefix>netatmo_bridge</prefix>
+        <level>INFO</level>
+    </logging>
+</configuration>
