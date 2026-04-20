@@ -18,7 +18,6 @@ netatmo_config.xml
 .vscode/
 *.swp
 *.swo
-netatmo.service
 
 # OS
 .DS_Store

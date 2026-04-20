@@ -1,0 +1,13 @@
+[Unit]
+Description=Netatmo Websocket to MQTT Bridge
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=marco
+ExecStartPre=/bin/sh -c 'until nc -w 2 app.netatmo.net 443; do sleep 2; done' 
+ExecStart=/path/to/netatmo_bot/bin/python3 /path/to/netatmo_bot/netatmo_bridge.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target 
