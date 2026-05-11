@@ -109,10 +109,8 @@ async def main():
             await connect_netatmo(home_status, auth, config)
             logging.getLogger(config['logging_prefix']).debug("Connection successful")
             reconnect_interval = config['reconnect_interval']  # Reset on success
-        except MqttError as error:
+        except (ConnectionError, ConnectionClosedError, socket.gaierror, ApiError, Exception,MqttError) as error:
             logging.getLogger(config['logging_prefix']).warning(f'{type(error).__name__}: {error}. Reconnecting in {reconnect_interval} seconds.')
-        except (ConnectionError, ConnectionClosedError, socket.gaierror, ApiError, Exception) as error:
-            logging.getLogger(config['logging_prefix']).warning(f'Error "{error}". Reconnecting in {reconnect_interval} seconds.')
             reconnect_interval = min(reconnect_interval * config['backoff_multiplier'], config['max_reconnect_interval'])
         finally:
             await asyncio.sleep(reconnect_interval)
