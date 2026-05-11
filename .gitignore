@@ -22,3 +22,4 @@ netatmo_config.xml
 # OS
 .DS_Store
 Thumbs.db
+lib64

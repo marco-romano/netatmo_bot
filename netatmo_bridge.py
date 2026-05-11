@@ -120,7 +120,10 @@ async def periodic(auth, config):
     """Periodically refresh Netatmo home data to keep the WebSocket connection alive."""
     while True:
         await asyncio.sleep(config['refresh_homedata_timer'])
-        await query_snapshot(auth, config)
+        try:
+            await query_snapshot(auth, config)
+        except Exception as error:
+            logging.getLogger(config['logging_prefix']).warning(f"Periodic refresh failed: {error}")
 
 async def query_snapshot(auth, config):
     """Fetch current home data and status from Netatmo API and publish to MQTT."""
@@ -219,16 +222,23 @@ async def connect_netatmo(home_status, auth, config):
 
         # Connect MQTT Client using asyncio-mqtt wrapper
         async with Client(hostname=config['mqtt_endpoint'], username=config['mqtt_username'], password=config['mqtt_password']) as client:
-            asyncio.create_task(route_mqtt_command(client, home_status, config, f"{config['base_mqtt_topic']}/#"))
-            await client.subscribe(f"{config['base_mqtt_topic']}/#")
-            await websocket.send(json_string)
-            while True:
-                ws_message = await websocket.recv()
-                json_processed = json.loads(ws_message)
-                room_and_modules = get_elements(json_processed)
-                for subtopic in room_and_modules:
-                    logging.getLogger(config['logging_prefix']).debug(f"Publishing to MQTT topic={config['base_mqtt_topic']}/{subtopic}, payload={room_and_modules[subtopic]}")
-                    await client.publish(f"{config['base_mqtt_topic']}/{subtopic}", json.dumps(room_and_modules[subtopic]))
+            mqtt_task = asyncio.create_task(route_mqtt_command(client, home_status, config, f"{config['base_mqtt_topic']}/#"))
+            try:
+                await client.subscribe(f"{config['base_mqtt_topic']}/#")
+                await websocket.send(json_string)
+                while True:
+                    ws_message = await websocket.recv()
+                    json_processed = json.loads(ws_message)
+                    room_and_modules = get_elements(json_processed)
+                    for subtopic in room_and_modules:
+                        logging.getLogger(config['logging_prefix']).debug(f"Publishing to MQTT topic={config['base_mqtt_topic']}/{subtopic}, payload={room_and_modules[subtopic]}")
+                        await client.publish(f"{config['base_mqtt_topic']}/{subtopic}", json.dumps(room_and_modules[subtopic]))
+            finally:
+                mqtt_task.cancel()
+                try:
+                    await mqtt_task
+                except (asyncio.CancelledError, MqttError):
+                    pass
 
 
 if __name__ == "__main__":
